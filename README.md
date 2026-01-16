@@ -48,8 +48,3 @@ terraform destroy
 - AWS credentials are expected to be provided via CLI profiles or environment variables
 - This setup assumes a default VPC
 
----
-
-## License
-
-MIT
