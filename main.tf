@@ -1,13 +1,3 @@
-terraform {
-  required_version = ">= 1.5.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.0"
-    }
-  }
-}
-
 provider "aws" {
   region = var.aws_region
 }
@@ -84,44 +74,9 @@ resource "aws_instance" "ubuntu" {
   key_name                    = var.key_name
   associate_public_ip_address = true
 
-  user_data = <<-EOF
-    #!/bin/bash
-    set -euxo pipefail
-
-    export DEBIAN_FRONTEND=noninteractive
-
-    apt-get update
-    apt-get install -y ca-certificates curl gnupg
-
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    chmod a+r /etc/apt/keyrings/docker.gpg
-
-    . /etc/os-release
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $VERSION_CODENAME stable" \
-      > /etc/apt/sources.list.d/docker.list
-
-    apt-get update
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    systemctl enable --now docker
-
-    # Add ubuntu user to docker group (log out/in to take effect)
-    usermod -aG docker ubuntu
-
-    docker --version
-    docker compose version
-  EOF
-
   tags = {
     Name = "${var.name_prefix}-ubuntu-docker"
   }
 }
 
-output "public_ip" {
-  value = aws_instance.ubuntu.public_ip
-}
 
-output "ssh_command" {
-  value = "ssh -i ${var.private_key_path} ubuntu@${aws_instance.ubuntu.public_ip}"
-}
