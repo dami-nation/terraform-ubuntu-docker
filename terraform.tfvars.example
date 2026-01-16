@@ -1,0 +1,5 @@
+aws_region       = "us-east-1"
+key_name         = "YOUR-KP-NAME"
+private_key_path = "YOUR-KP-PATH"
+ssh_cidr         = "YOUR-PUBLIC-IP/32"
+allow_http       = false
