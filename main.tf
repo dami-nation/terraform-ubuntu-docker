@@ -2,10 +2,12 @@ provider "aws" {
   region = var.aws_region
 }
 
+# Default VPC
 data "aws_vpc" "default" {
   default = true
 }
 
+# Default subnets
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
@@ -13,7 +15,7 @@ data "aws_subnets" "default" {
   }
 }
 
-# Latest Ubuntu 22.04 LTS AMD64 from Canonical
+# Latest Ubuntu 22.04 LTS (amd64)
 data "aws_ami" "ubuntu_2204" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
@@ -29,9 +31,10 @@ data "aws_ami" "ubuntu_2204" {
   }
 }
 
+# Security group
 resource "aws_security_group" "ubuntu_sg" {
   name        = "${var.name_prefix}-sg"
-  description = "Allow SSH"
+  description = "Allow SSH (and optional HTTP)"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -41,7 +44,6 @@ resource "aws_security_group" "ubuntu_sg" {
     protocol    = "tcp"
     cidr_blocks = [var.ssh_cidr]
   }
-
 
   dynamic "ingress" {
     for_each = var.allow_http ? [1] : []
@@ -66,6 +68,7 @@ resource "aws_security_group" "ubuntu_sg" {
   }
 }
 
+# EC2 instance with Docker installed via user_data
 resource "aws_instance" "ubuntu" {
   ami                         = data.aws_ami.ubuntu_2204.id
   instance_type               = var.instance_type
@@ -74,9 +77,10 @@ resource "aws_instance" "ubuntu" {
   key_name                    = var.key_name
   associate_public_ip_address = true
 
+  user_data                   = file("${path.module}/user_data.sh")
+  user_data_replace_on_change = true
+
   tags = {
     Name = "${var.name_prefix}-ubuntu-docker"
   }
 }
-
-
