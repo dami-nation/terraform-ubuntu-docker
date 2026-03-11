@@ -1,13 +1,7 @@
-# Terraform
 .terraform/
+.terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
-crash.log
-crash.*.log
-
-# tfvars (keep only terraform.tfvars.example)
+*.tfstate
+*.tfstate.*
 *.tfvars
-*.tfvars.json
-
-# macOS
-.DS_Store
